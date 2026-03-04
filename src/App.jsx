@@ -567,8 +567,8 @@ function HeroName({ desktop, dark }) {
 
   const nameStyle = {
     fontFamily:    'var(--font)',
-    fontWeight:    800,
-    letterSpacing: '-0.03em',
+    fontWeight:    700,
+    letterSpacing: '-0.01em',
     lineHeight:    0.88,
     color:         'var(--white)',
     textTransform: 'uppercase',
@@ -602,7 +602,7 @@ function HeroName({ desktop, dark }) {
         {dims && <PolygonFrame width={dims.width} height={dims.height}/>}
         <h1 ref={nameRef} style={{
           ...nameStyle,
-          fontSize: desktop ? 'clamp(4rem,10vw,9rem)' : 'clamp(2.8rem,13vw,5rem)',
+          fontSize: desktop ? 'clamp(3rem,5.5vw,5.5rem)' : 'clamp(2.2rem,10vw,3.6rem)',
           display:  'inline-block',
           padding:  desktop ? '0 8px' : '0 4px',
         }}>
