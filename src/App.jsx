@@ -10,7 +10,18 @@ const CONFIG = {
   coords:   '48.8566° N, 2.3522° E',   // display coordinates (flavour)
   roles:    ['HISTORIAN', 'WRITER', 'DIGITAL CRAFTSMAN'],
   tagline:  'A curious soul, fascinated by history, art and travel — who creates the things he wishes existed.',
-  pinned:   ['roadtripperde', 'timeline-de'],
+  pinned: [
+    {
+      name:      'roadtripperde',
+      strapline: 'Discover the history buried along Germany\'s roads. Enter two cities, get a driving route, surface the stories worth stopping for.',
+      vercel:    'https://roadtripperde.vercel.app',
+    },
+    {
+      name:      'timeline-de',
+      strapline: 'Every station has a past. AI-generated historical context for stops across Germany\'s rail network, rendered as you travel.',
+      vercel:    'https://railhistoryde.vercel.app',
+    },
+  ],
   expertise: [
     'German History', 'Investigative Journalism', 'Long-form Writing',
     'AI Integration', 'React / Vite', 'Geospatial Tools',
@@ -434,63 +445,118 @@ function SocialLink({ label, href }) {
 const LANG_MAP = {JavaScript:'JS',TypeScript:'TS',HTML:'HTML',CSS:'CSS',Python:'PY',Rust:'RS',Shell:'SH'}
 
 function RepoCard({ repo, index }) {
-  const [hov, set] = useState(false)
-  const lang = repo.language ? (LANG_MAP[repo.language]||repo.language) : null
-  const date = new Date(repo.updated_at).toLocaleDateString('en-GB',{month:'short',year:'numeric'})
-  const opCode = ['OP-☿','OP-☉','OP-☽','OP-♄'][index % 4]
+  const [imgErr, setImgErr] = useState(false)
+  const lang    = repo.language ? (LANG_MAP[repo.language] || repo.language) : null
+  const date    = new Date(repo.updated_at).toLocaleDateString('en-GB', { month:'short', year:'numeric' })
+  const opCode  = ['OP-☿','OP-☉','OP-☽','OP-♄'][index % 4]
+  const shotUrl = `https://image.thum.io/get/width/800/crop/500/noanimate/${repo.vercel}`
 
   return (
-    <a href={repo.html_url} target="_blank" rel="noopener noreferrer"
-      onMouseEnter={()=>set(true)} onMouseLeave={()=>set(false)}
-      className="mod"
-      style={{
-        display:'block', textDecoration:'none',
-        borderColor: hov ? 'var(--rule-hi)' : 'var(--rule)',
-        transition:'border-color .2s, background .2s',
-        background: hov ? 'var(--surface)' : 'var(--deep)',
-      }}
-    >
-      <ModHeader label={opCode} right={date}/>
-      <div style={{padding:'16px 16px 18px'}}>
-        {/* Left-border accent on hover */}
-        <div style={{
-          position:'absolute', left:0, top:'20%', bottom:'20%', width:2,
-          background:'var(--gold)',
-          transform: hov ? 'scaleY(1)' : 'scaleY(0)',
-          transformOrigin:'top',
-          transition:'transform .22s cubic-bezier(.16,1,.3,1)',
-        }}/>
+    <div className="mod" style={{ display:'flex', flexDirection:'column' }}>
+      <ModHeader label={opCode} right={date} />
 
+      {/* Left-border accent */}
+      <div style={{
+        position:'absolute', left:0, top:0, bottom:0, width:2,
+        background:'var(--gold)', opacity:.5,
+      }}/>
+
+      {/* Screenshot */}
+      {!imgErr && repo.vercel && (
+        <a href={repo.vercel} target="_blank" rel="noopener noreferrer"
+          style={{ display:'block', overflow:'hidden', borderBottom:'1px solid var(--rule)', flexShrink:0 }}
+        >
+          <img
+            src={shotUrl}
+            alt={`${repo.name} screenshot`}
+            onError={() => setImgErr(true)}
+            style={{
+              width:'100%', display:'block',
+              aspectRatio:'16/9', objectFit:'cover',
+              filter:'grayscale(15%) contrast(1.04)',
+              opacity:.85,
+              transition:'opacity .2s, filter .2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity='1'; e.currentTarget.style.filter='grayscale(0%) contrast(1)' }}
+            onMouseLeave={e => { e.currentTarget.style.opacity='.85'; e.currentTarget.style.filter='grayscale(15%) contrast(1.04)' }}
+          />
+        </a>
+      )}
+
+      <div style={{ padding:'16px 16px 18px', display:'flex', flexDirection:'column', gap:10, flex:1 }}>
+
+        {/* Name */}
         <div style={{
           fontFamily:'var(--font)', fontSize:'1rem', fontWeight:700,
-          letterSpacing:'-.01em', color: hov?'var(--white)':'var(--white-dim)',
-          marginBottom:8, transition:'color .18s',
-          display:'flex', alignItems:'baseline', justifyContent:'space-between',
+          letterSpacing:'-.01em', color:'var(--white)',
         }}>
-          <span>{repo.name}</span>
-          <span style={{
-            fontSize:'.75rem', color: hov?'var(--gold)':'var(--ash)',
-            transition:'color .18s, transform .18s',
-            transform: hov?'translate(2px,-2px)':'none',
-            display:'inline-block',
-          }}>↗</span>
+          {repo.name}
         </div>
 
+        {/* Strapline — our custom copy, takes priority */}
         <p style={{
           fontFamily:'var(--font)', fontSize:'.8rem', fontWeight:400,
-          lineHeight:1.65, color:'var(--silver)', marginBottom:14,
-        }}>{repo.description||'—'}</p>
+          lineHeight:1.65, color:'var(--silver)', flex:1,
+        }}>
+          {repo.strapline || repo.description || '—'}
+        </p>
 
+        {/* Meta row */}
         <div style={{
           display:'flex', gap:12, alignItems:'center',
           fontFamily:'var(--font)', fontSize:'.58rem', fontWeight:600,
-          letterSpacing:'.12em', color:'var(--ash)',
+          letterSpacing:'.12em', color:'var(--ash)', marginBottom:4,
         }}>
-          {lang && <span style={{color:'var(--gold)',opacity:.8}}>{lang}</span>}
+          {lang && <span style={{ color:'var(--gold)', opacity:.8 }}>{lang}</span>}
           {repo.stargazers_count > 0 && <span>★ {repo.stargazers_count}</span>}
-          <span style={{marginLeft:'auto', opacity:.45}}>{date}</span>
+          <span style={{ marginLeft:'auto', opacity:.45 }}>{date}</span>
+        </div>
+
+        {/* Buttons */}
+        <div style={{ display:'flex', gap:8 }}>
+          {repo.vercel && (
+            <CardBtn href={repo.vercel} primary>
+              ↗ LIVE DEMO
+            </CardBtn>
+          )}
+          <CardBtn href={repo.html_url}>
+            ⌥ REPO
+          </CardBtn>
         </div>
       </div>
+    </div>
+  )
+}
+
+function CardBtn({ href, children, primary }) {
+  const [hov, set] = useState(false)
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer"
+      onMouseEnter={() => set(true)} onMouseLeave={() => set(false)}
+      style={{
+        display:        'inline-flex',
+        alignItems:     'center',
+        gap:            6,
+        fontFamily:     'var(--font)',
+        fontSize:       '.58rem',
+        fontWeight:     700,
+        letterSpacing:  '.18em',
+        textTransform:  'uppercase',
+        textDecoration: 'none',
+        padding:        '7px 14px',
+        border:         `1px solid ${hov ? (primary ? 'var(--gold)' : 'var(--rule-hi)') : 'var(--rule)'}`,
+        background:     hov
+          ? (primary ? 'var(--gold-glow)' : 'var(--surface)')
+          : 'transparent',
+        color: hov
+          ? (primary ? 'var(--gold)' : 'var(--white)')
+          : (primary ? 'var(--silver)' : 'var(--ash)'),
+        transition: 'all .15s',
+        flex: primary ? '1' : '0 0 auto',
+        justifyContent: 'center',
+      }}
+    >
+      {children}
     </a>
   )
 }
@@ -667,20 +733,26 @@ export default function App() {
     fetch(`https://api.github.com/users/${CONFIG.handle}/repos?per_page=100`)
       .then(r => { if (!r.ok) throw 0; return r.json() })
       .then(all => {
-        const p = CONFIG.pinned.map(n => all.find(r => r.name === n)).filter(Boolean)
+        const p = CONFIG.pinned
+          .map(pin => {
+            const r = all.find(r => r.name === pin.name)
+            return r ? { ...r, strapline: pin.strapline, vercel: pin.vercel } : null
+          })
+          .filter(Boolean)
         if (!p.length) throw 0
         setRepos(p)
       })
       .catch(() => {
         setRepoErr(true)
-        setRepos(CONFIG.pinned.map((name, i) => ({
-          name,
-          description: i === 0
-            ? 'Road trip heritage companion — surfacing historical POIs along driving routes across Germany.'
-            : 'AI-powered historical content along German rail routes. React + Vite, deployed on Vercel.',
-          language:'JavaScript', stargazers_count:0,
-          updated_at:'2026-01-01T00:00:00Z',
-          html_url:`https://github.com/${CONFIG.handle}/${name}`,
+        setRepos(CONFIG.pinned.map((pin) => ({
+          name:             pin.name,
+          strapline:        pin.strapline,
+          vercel:           pin.vercel,
+          description:      '',
+          language:         'JavaScript',
+          stargazers_count: 0,
+          updated_at:       '2026-01-01T00:00:00Z',
+          html_url:         `https://github.com/${CONFIG.handle}/${pin.name}`,
         })))
       })
   }, [])
