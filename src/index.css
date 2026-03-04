@@ -22,7 +22,7 @@ html { font-size:16px; -webkit-font-smoothing:antialiased; text-rendering:optimi
   --gold:        #C8A84A;
   --gold-glow:   rgba(200,168,74,0.18);
   --gold-trace:  rgba(200,168,74,0.06);
-  --font:        'Syne', system-ui, sans-serif;
+  --font:        'Barlow', system-ui, sans-serif;
 }
 :root.light {
   --black:       #F8F5EF;
